@@ -1,11 +1,10 @@
 import React from "react";
 import { DragDropContext, Droppable } from "react-beautiful-dnd";
 import styled from "styled-components";
+import "reset-css";
 
 import initialData from "./initial-data";
 import Column from "./Column";
-
-import "reset-css";
 
 const Container = styled.div`
 	display: flex;
@@ -14,55 +13,50 @@ const Container = styled.div`
 class App extends React.PureComponent {
 	state = initialData;
 
-	// 'result' contains drag source and destination info.
-	onDragEnd = result => {
-		// Move task inside its column
-		const { destination, source, draggableId, type } = result;
+	moveColumn = result => {
+		const { source, destination, draggableId } = result;
+		const newColumnOrder = Array.from(this.state.columnOrder);
 
-		const start = this.state.columns[source.droppableId];
-		const finish = this.state.columns[destination.droppableId];
+		newColumnOrder.splice(source.index, 1);
+		newColumnOrder.splice(destination.index, 0, draggableId);
 
-		if (!destination) return;
-		if (destination.droppableId === source.droppableId && destination.index === source.index) return;
+		const newState = {
+			...this.state,
+			columnOrder: newColumnOrder
+		};
 
-		if (type === "column") {
-			const newColumnOrder = Array.from(this.state.columnOrder);
-			newColumnOrder.splice(source.index, 1);
-			newColumnOrder.splice(destination.index, 0, draggableId);
+		this.setState(newState);
+		return;
+	};
 
-			const newState = {
-				...this.state,
-				columnOrder: newColumnOrder
-			};
+	moveTaskWithinColumn = (result, start) => {
+		const { source, destination, draggableId } = result;
+		const newTaskIds = Array.from(start.taskIds); // copy to avoid mutations
 
-			this.setState(newState);
-			return;
-		}
+		newTaskIds.splice(source.index, 1);
+		newTaskIds.splice(destination.index, 0, draggableId);
 
-		if (start === finish) {
-			const newTaskIds = Array.from(start.taskIds); // copy to avoid mutations
-			newTaskIds.splice(source.index, 1);
-			newTaskIds.splice(destination.index, 0, draggableId);
+		const newColumn = {
+			...start,
+			taskIds: newTaskIds
+		};
 
-			const newColumn = {
-				...start,
-				taskIds: newTaskIds
-			};
+		const newState = {
+			...this.state,
+			columns: {
+				...this.state.columns,
+				[newColumn.id]: newColumn
+			}
+		};
 
-			const newState = {
-				...this.state,
-				columns: {
-					...this.state.columns,
-					[newColumn.id]: newColumn
-				}
-			};
+		this.setState(newState);
+		return;
+	};
 
-			this.setState(newState);
-			return;
-		}
-
-		// Moving task to another column
+	moveTaskToAnotherColumn = (result, start, finish) => {
+		const { source, destination, draggableId } = result;
 		const startTaskIds = Array.from(start.taskIds);
+
 		startTaskIds.splice(source.index, 1);
 		const newStart = {
 			...start,
@@ -86,6 +80,21 @@ class App extends React.PureComponent {
 		};
 
 		this.setState(newState);
+		return;
+	};
+
+	// 'result' contains drag source and destination info.
+	onDragEnd = result => {
+		const { source, destination, type } = result;
+		const start = this.state.columns[source.droppableId];
+		const finish = this.state.columns[destination.droppableId];
+
+		if (!destination) return; //if task is moved outside of available area
+		if (destination.droppableId === source.droppableId && destination.index === source.index) return;
+
+		if (type === "column") this.moveColumn(result);
+		else if (start === finish) this.moveTaskWithinColumn(result, start);
+		else this.moveTaskToAnotherColumn(result, start, finish);
 	};
 
 	render() {

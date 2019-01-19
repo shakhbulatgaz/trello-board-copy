@@ -27,27 +27,25 @@ const TaskList = styled.div`
 	min-height: 100px;
 `;
 
-export default class Column extends React.PureComponent {
-	render() {
-		return (
-			<Draggable draggableId={this.props.column.id} index={this.props.index}>
-				{provided => (
-					<Container {...provided.draggableProps} ref={provided.innerRef}>
-						<Title {...provided.dragHandleProps}>{this.props.column.title}</Title>
-						<Droppable droppableId={this.props.column.id} type="task">
-							{/* Droppable uses 'render props' pattern and expects child to be a function  */}
-							{(provided, snapshot) => (
-								<TaskList ref={provided.innerRef} {...provided.droppableProps} isDraggingOver={snapshot.isDraggingOver}>
-									{this.props.tasks.map((task, index) => (
-										<Task key={task.id} task={task} index={index} />
-									))}
-									{provided.placeholder}
-								</TaskList>
-							)}
-						</Droppable>
-					</Container>
-				)}
-			</Draggable>
-		);
-	}
-}
+const Column = props => (
+	<Draggable draggableId={props.column.id} index={props.index}>
+		{provided => (
+			<Container {...provided.draggableProps} ref={provided.innerRef}>
+				<Title {...provided.dragHandleProps}>{props.column.title}</Title>
+				<Droppable droppableId={props.column.id} type="task">
+					{/* Droppable uses 'render props' pattern and expects child to be a function  */}
+					{(provided, snapshot) => (
+						<TaskList ref={provided.innerRef} {...provided.droppableProps} isDraggingOver={snapshot.isDraggingOver}>
+							{props.tasks.map((task, index) => (
+								<Task key={task.id} task={task} index={index} />
+							))}
+							{provided.placeholder}
+						</TaskList>
+					)}
+				</Droppable>
+			</Container>
+		)}
+	</Draggable>
+);
+
+export default Column;
