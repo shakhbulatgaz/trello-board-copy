@@ -1,14 +1,10 @@
 import React from "react";
 import { DragDropContext, Droppable } from "react-beautiful-dnd";
-import styled from "styled-components";
 import "reset-css";
 
 import initialData from "./initial-data";
-import Column from "./Column";
-
-const Container = styled.div`
-	display: flex;
-`;
+import Column from "../Dashboard/Column/Column";
+import styles from "./app.module.css";
 
 class App extends React.PureComponent {
 	state = initialData;
@@ -83,7 +79,6 @@ class App extends React.PureComponent {
 		return;
 	};
 
-	// 'result' contains drag source and destination info.
 	onDragEnd = result => {
 		const { source, destination, type } = result;
 		const start = this.state.columns[source.droppableId];
@@ -99,21 +94,23 @@ class App extends React.PureComponent {
 
 	render() {
 		return (
-			<DragDropContext onDragEnd={this.onDragEnd}>
-				<Droppable droppableId="all-columns" direction="horizontal" type="column">
-					{provided => (
-						<Container {...provided.droppableProps} ref={provided.innerRef}>
-							{this.state.columnOrder.map((columnId, index) => {
-								const start = this.state.columns[columnId];
-								const tasks = start.taskIds.map(taskId => this.state.tasks[taskId]);
+			<div className={styles.app_background}>
+				<DragDropContext onDragEnd={this.onDragEnd}>
+					<Droppable droppableId="all-columns" direction="horizontal" type="column">
+						{provided => (
+							<div className={styles.container} {...provided.droppableProps} ref={provided.innerRef}>
+								{this.state.columnOrder.map((columnId, index) => {
+									const start = this.state.columns[columnId];
+									const tasks = start.taskIds.map(taskId => this.state.tasks[taskId]);
 
-								return <Column key={start.id} column={start} tasks={tasks} index={index} />;
-							})}
-							{provided.placeholder}
-						</Container>
-					)}
-				</Droppable>
-			</DragDropContext>
+									return <Column key={start.id} column={start} tasks={tasks} index={index} />;
+								})}
+								{provided.placeholder}
+							</div>
+						)}
+					</Droppable>
+				</DragDropContext>
+			</div>
 		);
 	}
 }
