@@ -1,3 +1,5 @@
+![Изображение доски в нынешнем виде](https://i.postimg.cc/BbFtn5k1/2019-01-20-19-16-19-React-App.png)
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
